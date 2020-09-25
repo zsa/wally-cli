@@ -15,7 +15,7 @@ You can also compile and install Wally using go's package manager, make sure you
 go get -u github.com/zsa/wally-cli
 ```
 
-## Installing dependencies
+## Installing dev dependencies
 Wally is compatible with Windows, Linux, and macOS. Developing using each platform requires some extra setup:
 
 ### Windows
@@ -31,4 +31,10 @@ Install libusb using `brew`:
 
 ```
 brew install libusb
+```
+
+### build
+
+```
+go build
 ```
