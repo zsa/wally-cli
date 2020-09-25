@@ -9,7 +9,11 @@ Note for Linux users, follow the instructions from our [wiki page](https://githu
 
 Note for Mac OS users, the CLI requires libusb to be installed: `brew install libusb`
 
-You can also compile and install Wally using go's package manager, make sure you follow the `Installing dev dependencies` section for your platform below.
+You can also compile and install Wally using go's package manager, make sure you follow the `Installing dev dependencies` section for your platform below:
+
+```
+go get -u github.com/zsa/wally-cli
+```
 
 ## Installing dependencies
 Wally is compatible with Windows, Linux, and macOS. Developing using each platform requires some extra setup:
