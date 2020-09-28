@@ -31,6 +31,7 @@ func teensyFlash(firmwarePath string, s *state) {
 	}
 
 	ctx := gousb.NewContext()
+	ctx.Debug(0)
 	defer ctx.Close()
 	var dev *gousb.Device
 
