@@ -178,7 +178,7 @@ func dfuFlash(firmwarePath string, s *state) {
 
 	err = dfuCommand(dev, 0, eraseFlash, &dfuStatus)
 	if err != nil {
-		message := fmt.Sprintf("Error while erasing flash:", err)
+		message := fmt.Sprintf("Error while erasing flash: %s", err)
 		log.Fatal(message)
 		return
 	}
