@@ -24,7 +24,7 @@ func main() {
 
 	if len(args) != 1 {
 		fmt.Println(aurora.Blue("Usage: wally-cli <firmware file>"))
-		os.Exit(0)
+		os.Exit(2)
 	}
 
 	if args[0] == "--version" {
@@ -34,14 +34,14 @@ func main() {
 	}
 
 	path := args[0]
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Println(aurora.Red("The file path you specified does not exist"))
-		os.Exit(1)
-	}
-
 	extension := filepath.Ext(path)
 	if extension != ".bin" && extension != ".hex" {
 		fmt.Println(aurora.Red("Please provide a valid firmware file: a"), aurora.Red(aurora.Underline(".hex")), aurora.Red("file (ErgoDox EZ) or a"), aurora.Red(aurora.Underline(".bin")), aurora.Red("file (Moonlander / Planck EZ)"))
+		os.Exit(2)
+	}
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		fmt.Println(aurora.Red("The file path you specified does not exist"))
 		os.Exit(1)
 	}
 
