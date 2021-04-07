@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/caarlos0/spin"
-	"github.com/logrusorgru/aurora"
 	"gopkg.in/cheggaaa/pb.v1"
 	"os"
 	"path/filepath"
@@ -23,25 +22,25 @@ func main() {
 	s := state{step: 0, total: 0, sent: 0}
 
 	if len(args) != 1 {
-		fmt.Println(aurora.Blue("Usage: wally-cli <firmware file>"))
+		fmt.Println("Usage: wally-cli <firmware file>")
 		os.Exit(2)
 	}
 
 	if args[0] == "--version" {
 		appVersion := fmt.Sprintf("wally-cli v%s", appVersion)
-		fmt.Println(aurora.Blue(appVersion))
+		fmt.Println(appVersion)
 		os.Exit(0)
 	}
 
 	path := args[0]
 	extension := filepath.Ext(path)
 	if extension != ".bin" && extension != ".hex" {
-		fmt.Println(aurora.Red("Please provide a valid firmware file: a"), aurora.Red(aurora.Underline(".hex")), aurora.Red("file (ErgoDox EZ) or a"), aurora.Red(aurora.Underline(".bin")), aurora.Red("file (Moonlander / Planck EZ)"))
+		fmt.Println("Please provide a valid firmware file: a .hex file (ErgoDox EZ) or a .bin file (Moonlander / Planck EZ)")
 		os.Exit(2)
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Println(aurora.Red("The file path you specified does not exist"))
+		fmt.Println("The file path you specified does not exist")
 		os.Exit(1)
 	}
 
@@ -74,5 +73,5 @@ func main() {
 		}
 	}
 	progress.Finish()
-	fmt.Println(aurora.Green("Your keyboard was successfully flashed and rebooted. Enjoy the new firmware!"))
+	fmt.Println("Your keyboard was successfully flashed and rebooted. Enjoy the new firmware!")
 }
