@@ -44,7 +44,7 @@ func main() {
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Println("The file path you specified does not exist")
+		fmt.Println("The file path you specified does not exist:", path)
 		os.Exit(1)
 	}
 
