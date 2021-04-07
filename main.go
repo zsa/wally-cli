@@ -3,11 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/caarlos0/spin"
-	"gopkg.in/cheggaaa/pb.v1"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/caarlos0/spin"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 var appVersion = "2.0.0"
@@ -36,9 +38,20 @@ func main() {
 		os.Exit(2)
 	}
 
-	path := flag.Arg(0)
-	extension := filepath.Ext(path)
-	if extension != ".bin" && extension != ".hex" {
+	path := ""
+	extension := ""
+	if uri, err := url.Parse(flag.Arg(0)); err == nil {
+		switch uri.Scheme {
+		case "", "file":
+			extension = filepath.Ext(uri.Path)
+			switch extension {
+			case ".bin", ".hex":
+				path = uri.Path
+			}
+		}
+	}
+
+	if path == "" {
 		fmt.Println("Please provide a valid firmware file: a .hex file (ErgoDox EZ) or a .bin file (Moonlander / Planck EZ)")
 		os.Exit(2)
 	}
