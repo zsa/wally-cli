@@ -1,13 +1,15 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"github.com/caarlos0/spin"
-	"github.com/logrusorgru/aurora"
-	"gopkg.in/cheggaaa/pb.v1"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/caarlos0/spin"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 var appVersion = "2.0.0"
@@ -19,29 +21,43 @@ type state struct {
 }
 
 func main() {
-	var args = os.Args[1:]
-	s := state{step: 0, total: 0, sent: 0}
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s: [flags] <firmware file>\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+	version := flag.Bool("version", false, "print the version and exit")
+	flag.Parse()
 
-	if len(args) != 1 {
-		fmt.Println(aurora.Blue("Usage: wally-cli <firmware file>"))
+	if *version {
+		fmt.Println(fmt.Sprintf("wally-cli v%s", appVersion))
 		os.Exit(0)
 	}
 
-	if args[0] == "--version" {
-		appVersion := fmt.Sprintf("wally-cli v%s", appVersion)
-		fmt.Println(aurora.Blue(appVersion))
-		os.Exit(0)
+	if flag.NArg() != 1 {
+		flag.Usage()
+		os.Exit(2)
 	}
 
-	path := args[0]
+	path := ""
+	extension := ""
+	if uri, err := url.Parse(flag.Arg(0)); err == nil {
+		switch uri.Scheme {
+		case "", "file":
+			extension = filepath.Ext(uri.Path)
+			switch extension {
+			case ".bin", ".hex":
+				path = uri.Path
+			}
+		}
+	}
+
+	if path == "" {
+		fmt.Println("Please provide a valid firmware file: a .hex file (ErgoDox EZ) or a .bin file (Moonlander / Planck EZ)")
+		os.Exit(2)
+	}
+
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Println(aurora.Red("The file path you specified does not exist"))
-		os.Exit(1)
-	}
-
-	extension := filepath.Ext(path)
-	if extension != ".bin" && extension != ".hex" {
-		fmt.Println(aurora.Red("Please provide a valid firmware file: a"), aurora.Red(aurora.Underline(".hex")), aurora.Red("file (ErgoDox EZ) or a"), aurora.Red(aurora.Underline(".bin")), aurora.Red("file (Moonlander / Planck EZ)"))
+		fmt.Println("The file path you specified does not exist:", path)
 		os.Exit(1)
 	}
 
@@ -52,6 +68,7 @@ func main() {
 	var progress *pb.ProgressBar
 	progressStarted := false
 
+	s := state{step: 0, total: 0, sent: 0}
 	if extension == ".bin" {
 		go dfuFlash(path, &s)
 	}
@@ -74,5 +91,5 @@ func main() {
 		}
 	}
 	progress.Finish()
-	fmt.Println(aurora.Green("Your keyboard was successfully flashed and rebooted. Enjoy the new firmware!"))
+	fmt.Println("Your keyboard was successfully flashed and rebooted. Enjoy the new firmware!")
 }
