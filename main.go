@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/caarlos0/spin"
+	"github.com/briandowns/spinner"
 	"gopkg.in/cheggaaa/pb.v1"
 )
 
@@ -61,8 +61,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	spinner := spin.New("%s Press the reset button of your keyboard.")
-	spinner.Start()
+	spin := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+	spin.Suffix = " Press the reset button of your keyboard."
+	spin.Color("black")
+	spin.Start()
 	spinnerStopped := false
 
 	var progress *pb.ProgressBar
@@ -80,7 +82,7 @@ func main() {
 		time.Sleep(500 * time.Millisecond)
 		if s.step > 0 {
 			if spinnerStopped == false {
-				spinner.Stop()
+				spin.Stop()
 				spinnerStopped = true
 			}
 			if progressStarted == false {
