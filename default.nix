@@ -1,4 +1,4 @@
-{ pkgs ? (import <nixpkgs> {}), lib ? (import <nixpkgs/lib>), system ? builtins.currentSystem }:
+{ pkgs ? (import <nixpkgs> { }), lib ? (import <nixpkgs/lib>), system ? builtins.currentSystem }:
 
 assert lib.versionAtLeast pkgs.go.version "1.14";
 
@@ -11,7 +11,7 @@ pkgs.buildGoModule rec {
   vendorSha256 = "HffgkuKmaOjTYi+jQ6vBlC50JqqbYiikURT6TCqL7e0=";
 
   subPackages = [ "." ];
- 
+
   buildInputs = with pkgs; [ libusb1 ];
   nativeBuildInputs = with pkgs; [ pkg-config ];
 
