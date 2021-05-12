@@ -18,6 +18,8 @@
         defaultPackage = (import ./default.nix) {
 			inherit pkgs lib system;
 		};
+
+		defaultApp = defaultPackage;
       }
     );
 }
