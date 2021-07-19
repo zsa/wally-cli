@@ -15,6 +15,11 @@ You can also compile and install Wally using go's package manager, make sure you
 go get -u github.com/zsa/wally-cli
 ```
 
+Note: Raspberry pi users using the 32bit version of raspbian should run
+```
+GOOS=linux GOARCH=arm go get -u github.com/zsa/wally-cli
+```
+
 ## Installing dev dependencies
 Wally is compatible with Windows, Linux, and macOS. Developing using each platform requires some extra setup:
 
