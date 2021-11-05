@@ -20,6 +20,18 @@ Note: Raspberry pi users using the 32bit version of raspbian should run
 GOOS=linux GOARCH=arm go get -u github.com/zsa/wally-cli
 ```
 
+## Automating firmware downloads from the CLI
+
+To get your latest binary all you need to do is got to this url: `https://oryx.zsa.io/{layout ID}/latest/binary`
+
+A few things to note:
+
+- You can also replace the `latest` keyword with a revision ID if you want to get a specific revision.
+- You can replace the `binary` keyword with `source`, to download the source code of your layout.
+- The URL redirects to our CDN, so you will need to add the -L param to curl. If you use wget it should redirect by default.
+- If the revision is not compiled, the endpoint will return a 404
+- If the layout is private, the endpoint will return a 401
+
 ## Installing dev dependencies
 Wally is compatible with Windows, Linux, and macOS. Developing using each platform requires some extra setup:
 
