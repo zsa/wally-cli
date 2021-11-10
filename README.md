@@ -55,3 +55,8 @@ brew install libusb
 ```
 go build
 ```
+
+
+## Sending feedback
+
+As you may have noticed, we do not have GitHub Issues enabled for this project. Instead, please submit all feedback via email to contact@zsa.io — you will find us very responsive. Thank you for your help with Wally!
