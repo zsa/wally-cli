@@ -2,3 +2,4 @@ wally-cli
 .idea
 *.bin
 *.hex
+result
