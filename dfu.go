@@ -1,224 +1,227 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"github.com/google/gousb"
-	"io/ioutil"
-	"log"
-	"time"
-)
+    "errors"
+    "fmt"
+    "github.com/google/gousb"
+    "io/ioutil"
+    "runtime"
+    "log"
+    "time"
+    )
 
 type status struct {
-	bStatus       string
-	bwPollTimeout int
-	bState        string
-	iString       string
+    bStatus       string
+    bwPollTimeout int
+    bState        string
+    iString       string
 }
 
 func dfuCommand(dev *gousb.Device, addr int, command int, status *status) (err error) {
-	var buf []byte
-	if command == setAddress {
-		buf = make([]byte, 5)
-		buf[0] = 0x21
-		buf[1] = byte(addr & 0xff)
-		buf[2] = byte((addr >> 8) & 0xff)
-		buf[3] = byte((addr >> 16) & 0xff)
-		buf[4] = byte((addr >> 24) & 0xff)
-	}
-	if command == eraseAddress {
-		buf = make([]byte, 5)
-		buf[0] = 0x41
-		buf[1] = byte(addr & 0xff)
-		buf[2] = byte((addr >> 8) & 0xff)
-		buf[3] = byte((addr >> 16) & 0xff)
-		buf[4] = byte((addr >> 24) & 0xff)
-	}
-	if command == eraseFlash {
-		buf = make([]byte, 1)
-		buf[0] = 0x41
-	}
+    var buf []byte
+    if command == setAddress {
+        buf = make([]byte, 5)
+        buf[0] = 0x21
+        buf[1] = byte(addr & 0xff)
+        buf[2] = byte((addr >> 8) & 0xff)
+        buf[3] = byte((addr >> 16) & 0xff)
+        buf[4] = byte((addr >> 24) & 0xff)
+    }
+    if command == eraseAddress {
+        buf = make([]byte, 5)
+        buf[0] = 0x41
+        buf[1] = byte(addr & 0xff)
+        buf[2] = byte((addr >> 8) & 0xff)
+        buf[3] = byte((addr >> 16) & 0xff)
+        buf[4] = byte((addr >> 24) & 0xff)
+    }
+    if command == eraseFlash {
+        buf = make([]byte, 1)
+        buf[0] = 0x41
+    }
 
-	_, err = dev.Control(33, 1, 0, 0, buf)
+    _, err = dev.Control(33, 1, 0, 0, buf)
 
-	err = dfuPollTimeout(dev, status)
+    err = dfuPollTimeout(dev, status)
 
-	if err != nil {
-		return err
-	}
+    if err != nil {
+        return err
+    }
 
-	return nil
+    return nil
 }
 
 func dfuPollTimeout(dev *gousb.Device, status *status) (err error) {
-	for i := 0; i < 3; i++ {
-		err = dfuGetStatus(dev, status)
-		time.Sleep(time.Duration(status.bwPollTimeout) * time.Millisecond)
-	}
-	return err
+    for i := 0; i < 3; i++ {
+        err = dfuGetStatus(dev, status)
+        time.Sleep(time.Duration(status.bwPollTimeout) * time.Millisecond)
+    }
+    return err
 }
 
 func dfuGetStatus(dev *gousb.Device, status *status) (err error) {
-	buf := make([]byte, 6)
-	stat, err := dev.Control(161, 3, 0, 0, buf)
-	if err != nil {
-		return err
-	}
-	if stat == 6 {
-		status.bStatus = string(buf[0])
-		status.bwPollTimeout = int((0xff & buf[3] << 16) | (0xff & buf[2]) | 0xff&buf[1])
-		status.bState = string(buf[4])
-		status.iString = string(buf[5])
-	}
-	return err
+    buf := make([]byte, 6)
+    stat, err := dev.Control(161, 3, 0, 0, buf)
+    if err != nil {
+        return err
+    }
+    if stat == 6 {
+        status.bStatus = string(buf[0])
+        status.bwPollTimeout = int((0xff & buf[3] << 16) | (0xff & buf[2]) | 0xff&buf[1])
+        status.bState = string(buf[4])
+        status.iString = string(buf[5])
+    }
+return err
 }
 
 func dfuClearStatus(dev *gousb.Device) (err error) {
-	_, err = dev.Control(33, 4, 2, 0, nil)
-	return err
+    _, err = dev.Control(33, 4, 2, 0, nil)
+return err
 }
 
 func dfuReboot(dev *gousb.Device, status *status) (err error) {
-	err = dfuPollTimeout(dev, status)
-	_, err = dev.Control(33, 1, 2, 0, nil)
-	time.Sleep(1000 * time.Millisecond)
-	err = dfuGetStatus(dev, status)
-	return err
+    err = dfuPollTimeout(dev, status)
+_, err = dev.Control(33, 1, 2, 0, nil)
+time.Sleep(1000 * time.Millisecond)
+err = dfuGetStatus(dev, status)
+    return err
 }
 
 func extractSuffix(fileData []byte) (hasSuffix bool, data []byte, err error) {
 
-	fileSize := len(fileData)
+    fileSize := len(fileData)
 
-	suffix := fileData[fileSize-dfuSuffixLength : fileSize]
-	d := string(suffix[10])
-	f := string(suffix[9])
-	u := string(suffix[8])
+    suffix := fileData[fileSize-dfuSuffixLength : fileSize]
+    d := string(suffix[10])
+    f := string(suffix[9])
+    u := string(suffix[8])
 
-	if d == "D" && f == "F" && u == "U" {
-		vid := int((suffix[5] << 8) + suffix[4])
-		pid := int((suffix[3] << 8) + suffix[2])
-		if vid != dfuSuffixVendorID || pid != dfuSuffixProductID {
-			message := fmt.Sprintf("Invalid vendor or product id, expected %#x:%#x got %#x:%#x", dfuSuffixVendorID, dfuSuffixProductID, vid, pid)
-			err = errors.New(message)
-			return true, fileData, err
+if d == "D" && f == "F" && u == "U" {
+vid := int((suffix[5] << 8) + suffix[4])
+        pid := int((suffix[3] << 8) + suffix[2])
+        if vid != dfuSuffixVendorID || pid != dfuSuffixProductID {
+            message := fmt.Sprintf("Invalid vendor or product id, expected %#x:%#x got %#x:%#x", dfuSuffixVendorID, dfuSuffixProductID, vid, pid)
+            err = errors.New(message)
+            return true, fileData, err
 
-		}
+        }
 
-		return true, fileData[0 : fileSize-dfuSuffixLength], nil
-	}
+        return true, fileData[0 : fileSize-dfuSuffixLength], nil
+    }
 
-	return false, fileData, nil
+    return false, fileData, nil
 }
 
 func dfuFlash(firmwarePath string, s *state) {
-	dfuStatus := status{}
-	fileData, err := ioutil.ReadFile(firmwarePath)
-	if err != nil {
-		message := fmt.Sprintf("Error while opening firmware: %s", err)
-		log.Fatal(message)
-		return
-	}
+    dfuStatus := status{}
+    fileData, err := ioutil.ReadFile(firmwarePath)
+    if err != nil {
+        message := fmt.Sprintf("Error while opening firmware: %s", err)
+        log.Fatal(message)
+        return
+    }
 
-	_, firmwareData, err := extractSuffix(fileData)
-	if err != nil {
-		message := fmt.Sprintf("Error while extracting DFU Suffix: %s", err)
-		log.Fatal(message)
-		return
-	}
+    _, firmwareData, err := extractSuffix(fileData)
+    if err != nil {
+        message := fmt.Sprintf("Error while extracting DFU Suffix: %s", err)
+        log.Fatal(message)
+        return
+    }
 
-	ctx := gousb.NewContext()
-	ctx.Debug(0)
-	defer ctx.Close()
-	var dev *gousb.Device
+    ctx := gousb.NewContext()
+    ctx.Debug(0)
+    defer ctx.Close()
+    var dev *gousb.Device
 
-	// Get the list of device that match TMK's vendor id
-	for {
-		devs, _ := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
-			if desc.Vendor == gousb.ID(dfuVendorID) && desc.Product == gousb.ID(dfuProductID) {
-				return true
-			}
-			return false
-		})
+    // Get the list of device that match TMK's vendor id
+    for {
+        devs, _ := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
+            if desc.Vendor == gousb.ID(dfuVendorID) && desc.Product == gousb.ID(dfuProductID) {
+                return true
+            }
+            return false
+        })
 
-		defer func() {
-			for _, d := range devs {
-				d.Close()
-			}
-		}()
+        defer func() {
+            for _, d := range devs {
+                d.Close()
+            }
+        }()
 
-		if len(devs) > 0 {
-			dev = devs[0]
-			break
-		}
-		time.Sleep(1 * time.Second)
-	}
+        if len(devs) > 0 {
+            dev = devs[0]
+            break
+        }
+        time.Sleep(1 * time.Second)
+    }
 
-	dev.SetAutoDetach(true)
+    if runtime.GOOS != "darwin" {
+        dev.SetAutoDetach(true)
+    }
 
-	dev.ControlTimeout = 5 * time.Second
+    dev.ControlTimeout = 5 * time.Second
 
-	cfg, err := dev.Config(1)
-	if err != nil {
-		message := fmt.Sprintf("Error while claiming the usb interface: %s", err)
-		log.Fatal(message)
-	}
-	defer cfg.Close()
+    cfg, err := dev.Config(1)
+    if err != nil {
+        message := fmt.Sprintf("Error while claiming the usb interface: %s", err)
+        log.Fatal(message)
+    }
+    defer cfg.Close()
 
-	fileSize := len(firmwareData)
-	s.total = fileSize
+    fileSize := len(firmwareData)
+    s.total = fileSize
 
-	err = dfuClearStatus(dev)
-	if err != nil {
-		message := fmt.Sprintf("Error while clearing the device status: %s", err)
-		log.Fatal(message)
-	}
+    err = dfuClearStatus(dev)
+    if err != nil {
+        message := fmt.Sprintf("Error while clearing the device status: %s", err)
+        log.Fatal(message)
+    }
 
-	s.step = 1
+    s.step = 1
 
-	err = dfuCommand(dev, 0, eraseFlash, &dfuStatus)
-	if err != nil {
-		message := fmt.Sprintf("Error while erasing flash: %s", err)
-		log.Fatal(message)
-		return
-	}
+    err = dfuCommand(dev, 0, eraseFlash, &dfuStatus)
+    if err != nil {
+        message := fmt.Sprintf("Error while erasing flash: %s", err)
+        log.Fatal(message)
+        return
+    }
 
-	for page := 0; page < fileSize; page += planckBlockSize {
-		addr := planckStartAddress + page
-		chunckSize := planckBlockSize
+    for page := 0; page < fileSize; page += planckBlockSize {
+        addr := planckStartAddress + page
+        chunckSize := planckBlockSize
 
-		if page+chunckSize > fileSize {
-			chunckSize = fileSize - page
-		}
+        if page+chunckSize > fileSize {
+            chunckSize = fileSize - page
+        }
 
-		err = dfuCommand(dev, addr, eraseAddress, &dfuStatus)
-		if err != nil {
-			message := fmt.Sprintf("Error while sending the erase address command: %s", err)
-			log.Fatal(message)
-		}
-		err = dfuCommand(dev, addr, setAddress, &dfuStatus)
-		if err != nil {
-			message := fmt.Sprintf("Error while sending the set address command: %s", err)
-			log.Fatal(message)
-		}
+        err = dfuCommand(dev, addr, eraseAddress, &dfuStatus)
+        if err != nil {
+            message := fmt.Sprintf("Error while sending the erase address command: %s", err)
+            log.Fatal(message)
+        }
+        err = dfuCommand(dev, addr, setAddress, &dfuStatus)
+        if err != nil {
+            message := fmt.Sprintf("Error while sending the set address command: %s", err)
+            log.Fatal(message)
+        }
 
-		buf := firmwareData[page : page+chunckSize]
-		bytes, err := dev.Control(33, 1, 2, 0, buf)
+        buf := firmwareData[page : page+chunckSize]
+        bytes, err := dev.Control(33, 1, 2, 0, buf)
 
-		if err != nil {
-			message := fmt.Sprintf("Error while sending firmware bytes: %s", err)
-			log.Fatal(message)
-		}
+        if err != nil {
+            message := fmt.Sprintf("Error while sending firmware bytes: %s", err)
+            log.Fatal(message)
+        }
 
-		s.sent += bytes
-	}
+        s.sent += bytes
+    }
 
-	err = dfuReboot(dev, &dfuStatus)
-	if err != nil {
-		message := fmt.Sprintf("Error while rebooting device: %s", err)
-		log.Fatal(message)
-		return
-	}
+    err = dfuReboot(dev, &dfuStatus)
+    if err != nil {
+        message := fmt.Sprintf("Error while rebooting device: %s", err)
+        log.Fatal(message)
+        return
+    }
 
-	s.step = 2
+    s.step = 2
 }
