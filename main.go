@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var appVersion = "2.0.0"
+var appVersion = "2.0.1"
 
 type state struct {
 	step  int
