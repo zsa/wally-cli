@@ -11,6 +11,11 @@ Note for Mac OS users, the CLI requires libusb to be installed: `brew install li
 
 You can also compile and install Wally using go's package manager, make sure you follow the `Installing dev dependencies` section for your platform below:
 
+For go >= 1.17
+```
+go install github.com/zsa/wally-cli@latest
+```
+For go < 1.17
 ```
 go get -u github.com/zsa/wally-cli
 ```
