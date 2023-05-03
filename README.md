@@ -12,7 +12,7 @@ Note for Mac OS users, the CLI requires libusb to be installed: `brew install li
 You can also compile and install Wally using go's package manager, make sure you follow the `Installing dev dependencies` section for your platform below:
 
 ```
-go get -u github.com/zsa/wally-cli
+go install github.com/zsa/wally-cli@latest
 ```
 
 Note: Raspberry pi users using the 32bit version of raspbian should run
