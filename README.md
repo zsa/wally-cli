@@ -1,4 +1,6 @@
-# Wally cli
+# Wally cli (Deprecated)
+
+⚠️⚠️⚠️ Wally is no longer maintained, instead please use our new flashing tool [Keymapp](https://www.zsa.io/flash#download)
 
 Flash your [ZSA Keyboard](https://ergodox-ez.com) the EZ way.
 
